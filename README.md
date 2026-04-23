@@ -2,7 +2,7 @@
 
 A full-featured Kanban board application built with Angular 21 and Tailwind CSS v4. Manage tasks across customisable columns, switch between light and dark themes, and persist your data across sessions — all in a responsive single-page app that works on desktop, tablet, and mobile.
 
-**Live demo:** _coming soon_
+**Live demo:** _https://fanciful-strudel-9843b4.netlify.app/_
 
 ---
 
