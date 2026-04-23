@@ -1,0 +1,73 @@
+<div class="sidebar-container flex flex-col h-full bg-white dark:bg-dark-surface">
+
+  <!-- Logo -->
+  <div class="px-6 pt-8 pb-[54px] hidden md:flex items-center gap-4">
+    <img src="assets/icons/Logo.svg" alt="" class="h-6.25 shrink-0">
+    <img src="assets/icons/kanban.svg" alt="Kanban" class="h-6.25 dark:invert shrink-0">
+  </div>
+
+  <!-- Board list -->
+  <nav class="flex-1 overflow-y-auto pr-6">
+    <p class="heading-s text-medium-gray pl-6 mb-5">
+      ALL BOARDS ({{ boardService.boardCount() }})
+    </p>
+
+    @for (board of boardService.boards(); track board.id) {
+      <a
+        [routerLink]="['/boards', board.id]"
+        routerLinkActive="active-board"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="board-nav-item flex items-center gap-4 pl-6 pr-4 py-[14px] rounded-r-full cursor-pointer
+               text-medium-gray hover:bg-primary/10 dark:hover:bg-white/10 hover:text-primary
+               transition-colors duration-150"
+      >
+        <img src="assets/icons/icon-board-grey.svg" alt="" class="board-icon-grey w-4 h-4 shrink-0">
+        <img src="assets/icons/icon-board-purple.svg" alt="" class="board-icon-purple w-4 h-4 shrink-0 hidden">
+        <span class="heading-m truncate">{{ board.name }}</span>
+      </a>
+    }
+
+    <!-- Create new board -->
+    <button
+      (click)="openAddBoard()"
+      class="flex items-center gap-4 pl-6 pr-4 py-[14px] rounded-r-full w-full
+             text-primary hover:text-primary-light transition-colors duration-150 cursor-pointer"
+    >
+      <img src="assets/icons/icon-board-purple.svg" alt="" class="w-4 h-4 shrink-0">
+      <span class="heading-m">+ Create New Board</span>
+    </button>
+  </nav>
+
+  <!-- Bottom: theme toggle + hide sidebar -->
+  <div class="px-4 pb-8 space-y-2">
+    <!-- Theme toggle -->
+    <div class="flex items-center justify-center gap-6 bg-light-bg dark:bg-dark-bg rounded-lg py-[14px] px-[56px]">
+      <img src="assets/icons/icon-sun.svg" alt="Light mode" class="w-[19px] h-[19px]">
+      <!-- Toggle track -->
+      <button
+        (click)="themeService.toggle()"
+        role="switch"
+        [attr.aria-checked]="themeService.isDark()"
+        aria-label="Toggle dark mode"
+        class="relative w-10 h-5 rounded-full bg-primary hover:bg-primary-light transition-colors duration-150 cursor-pointer"
+      >
+        <span
+          class="absolute top-0.75 w-3.5 h-3.5 bg-white rounded-full transition-all duration-150"
+          [style.left]="themeService.isDark() ? 'calc(100% - 17px)' : '3px'"
+        ></span>
+      </button>
+      <img src="assets/icons/icon-moon.svg" alt="Dark mode" class="w-4 h-4">
+    </div>
+
+    <!-- Hide sidebar -->
+    <button
+      (click)="hide.emit()"
+      class="flex items-center gap-[10px] pl-6 pr-4 py-[14px] rounded-r-full w-full
+             text-medium-gray hover:bg-primary/10 dark:hover:bg-white/10 hover:text-primary
+             transition-colors duration-150 cursor-pointer"
+    >
+      <img src="assets/icons/icon-hide-sidebar.svg" alt="" class="w-[18px] h-4 shrink-0">
+      <span class="heading-m">Hide Sidebar</span>
+    </button>
+  </div>
+</div>

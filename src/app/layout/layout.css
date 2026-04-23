@@ -1,0 +1,7 @@
+.app-shell {
+  height: 100dvh;
+}
+
+.sidebar-slot {
+  transition: width 0.3s ease;
+}

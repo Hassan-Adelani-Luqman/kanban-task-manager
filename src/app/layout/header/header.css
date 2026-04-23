@@ -1,0 +1,26 @@
+.header-bar {
+  height: 96px;
+  min-height: 96px;
+}
+
+@media (max-width: 768px) {
+  .header-bar {
+    height: 64px;
+    min-height: 64px;
+  }
+}
+
+/* Mobile board selector active state */
+.mobile-board-nav.mobile-active-board {
+  background-color: #635FC7;
+  color: white;
+}
+
+.mobile-board-nav.mobile-active-board .board-icon-grey {
+  display: none;
+}
+
+.mobile-board-nav.mobile-active-board .board-icon-purple {
+  display: block;
+  filter: brightness(0) invert(1);
+}

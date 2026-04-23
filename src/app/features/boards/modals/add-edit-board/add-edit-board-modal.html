@@ -1,0 +1,94 @@
+<app-modal-overlay>
+  <div class="p-6 md:p-8">
+
+    <h2 class="heading-l text-black dark:text-white mb-6">
+      {{ mode() === 'edit' ? 'Edit Board' : 'Add New Board' }}
+    </h2>
+
+    <!-- Board Name -->
+    <div class="flex flex-col gap-2 mb-6">
+      <label class="heading-s text-medium-gray dark:text-white">Board Name</label>
+      <div class="relative">
+        <input
+          type="text"
+          [ngModel]="boardName()"
+          (ngModelChange)="boardName.set($event); boardNameError.set('')"
+          placeholder="e.g. Web Design"
+          class="w-full border rounded px-4 py-2 body-l bg-white dark:bg-dark-surface
+                 text-black dark:text-white placeholder:text-medium-gray/40
+                 outline-none focus:border-primary transition-colors"
+          [class.border-destructive]="boardNameError()"
+          [class.border-lines-light]="!boardNameError()"
+        />
+        @if (boardNameError()) {
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 body-l text-destructive">
+            {{ boardNameError() }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Columns -->
+    <div class="flex flex-col gap-3 mb-6">
+      <label class="heading-s text-medium-gray dark:text-white">Board Columns</label>
+
+      @for (col of columns(); track col.id) {
+        <div class="flex items-center gap-4">
+          <!-- Color dot -->
+          <span
+            class="w-4 h-4 rounded-full shrink-0"
+            [style.background]="col.color"
+          ></span>
+
+          <div class="relative flex-1">
+            <input
+              type="text"
+              [ngModel]="col.name"
+              (ngModelChange)="updateColumnName(col.id, $event)"
+              placeholder="e.g. Todo"
+              class="w-full border rounded px-4 py-2 body-l bg-white dark:bg-dark-surface
+                     text-black dark:text-white placeholder:text-medium-gray/40
+                     outline-none focus:border-primary transition-colors"
+              [class.border-destructive]="col.error"
+              [class.border-lines-light]="!col.error"
+            />
+            @if (col.error) {
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 body-l text-destructive">
+                {{ col.error }}
+              </span>
+            }
+          </div>
+
+          <button
+            type="button"
+            (click)="removeColumn(col.id)"
+            aria-label="Remove column"
+            class="text-medium-gray hover:text-destructive transition-colors cursor-pointer shrink-0"
+          >
+            <img src="assets/icons/icon-cross.svg" alt="" class="w-[15px] h-[15px]">
+          </button>
+        </div>
+      }
+
+      <button
+        type="button"
+        (click)="addColumn()"
+        class="w-full py-2 rounded-full bg-primary/10 dark:bg-white text-primary heading-m
+               hover:bg-primary/25 dark:hover:bg-white/80 transition-colors cursor-pointer"
+      >
+        + Add New Column
+      </button>
+    </div>
+
+    <!-- Submit -->
+    <button
+      type="button"
+      (click)="submit()"
+      class="w-full py-[14px] rounded-full bg-primary hover:bg-primary-light
+             text-white heading-m transition-colors cursor-pointer"
+    >
+      {{ mode() === 'edit' ? 'Save Changes' : 'Create New Board' }}
+    </button>
+
+  </div>
+</app-modal-overlay>

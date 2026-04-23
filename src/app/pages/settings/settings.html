@@ -1,0 +1,37 @@
+<div class="p-6 md:p-8 max-w-lg">
+  <h2 class="heading-xl text-black dark:text-white mb-8">Settings</h2>
+
+  <!-- Theme -->
+  <section class="bg-white dark:bg-dark-surface rounded-lg p-6 mb-4">
+    <h3 class="heading-m text-black dark:text-white mb-4">Appearance</h3>
+    <div class="flex items-center justify-between">
+      <span class="body-l text-medium-gray">Dark Mode</span>
+      <button
+        (click)="themeService.toggle()"
+        role="switch"
+        [attr.aria-checked]="themeService.isDark()"
+        class="relative w-10 h-5 rounded-full bg-primary hover:bg-primary-light transition-colors cursor-pointer"
+      >
+        <span
+          class="absolute top-[3px] w-[14px] h-[14px] bg-white rounded-full transition-transform"
+          [class.translate-x-[22px]]="themeService.isDark()"
+          [class.translate-x-[3px]]="!themeService.isDark()"
+        ></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Data -->
+  <section class="bg-white dark:bg-dark-surface rounded-lg p-6">
+    <h3 class="heading-m text-black dark:text-white mb-4">Data</h3>
+    <p class="body-l text-medium-gray mb-4">
+      Reset all boards back to the original demo data. This will delete any boards or tasks you have created.
+    </p>
+    <button
+      (click)="resetData()"
+      class="w-full py-3 rounded-full bg-destructive hover:bg-destructive-light text-white heading-m transition-colors cursor-pointer"
+    >
+      Reset to Demo Data
+    </button>
+  </section>
+</div>

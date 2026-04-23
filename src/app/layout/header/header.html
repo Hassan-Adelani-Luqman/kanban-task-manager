@@ -1,0 +1,158 @@
+<header class="header-bar flex items-center bg-white dark:bg-dark-surface px-4 md:px-6 border-b border-lines-light dark:border-dark-lines">
+
+  <!-- Mobile logo (hidden on desktop — desktop logo is in sidebar) -->
+  <div class="flex items-center md:hidden mr-4 shrink-0">
+    <img src="assets/icons/Logo.svg" alt="Kanban" class="h-6.25 shrink-0">
+  </div>
+
+  <!-- Board name: desktop (plain text) / mobile (tap to open board selector) -->
+  <div class="flex-1 min-w-0">
+    <!-- Desktop -->
+    <h1 class="heading-l md:heading-xl text-black dark:text-white truncate hidden md:block">
+      {{ boardService.activeBoard()?.name ?? 'Select a board' }}
+    </h1>
+
+    <!-- Mobile: tappable board selector trigger -->
+    <button
+      type="button"
+      (click)="toggleMobileSelector($event)"
+      class="md:hidden flex items-center gap-2 heading-l text-black dark:text-white cursor-pointer max-w-full"
+    >
+      <span class="truncate">{{ boardService.activeBoard()?.name ?? 'Select a board' }}</span>
+      <!-- Chevron (CSS-only) -->
+      <svg
+        class="shrink-0 transition-transform duration-200"
+        [class.rotate-180]="mobileSelectorOpen()"
+        width="10" height="7" viewBox="0 0 10 7" fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M1 1l4 4 4-4" stroke="#635FC7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex items-center gap-2 md:gap-4 shrink-0">
+
+    <!-- Add new task button -->
+    @if (boardService.activeBoard()) {
+      <!-- Desktop -->
+      <button
+        (click)="openAddTask()"
+        [disabled]="!hasColumns"
+        class="hidden md:flex items-center gap-1 bg-primary hover:bg-primary-light disabled:opacity-25
+               text-white heading-m rounded-full px-6 py-4 transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed"
+      >
+        + Add New Task
+      </button>
+
+      <!-- Mobile: icon-only -->
+      <button
+        (click)="openAddTask()"
+        [disabled]="!hasColumns"
+        class="md:hidden flex items-center justify-center w-8 h-8 bg-primary hover:bg-primary-light
+               disabled:opacity-25 rounded-full transition-colors duration-150 cursor-pointer"
+        aria-label="Add new task"
+      >
+        <img src="assets/icons/icon-plus.svg" alt="" class="w-3 h-3">
+      </button>
+    }
+
+    <!-- Three-dot menu -->
+    @if (boardService.activeBoard()) {
+      <div class="relative">
+        <button
+          (click)="toggleMenu()"
+          aria-label="Board options"
+          class="p-2 cursor-pointer"
+        >
+          <img src="assets/icons/icon-vertical-ellipsis.svg" alt="" class="h-5">
+        </button>
+
+        @if (menuOpen()) {
+          <!-- Click-away backdrop -->
+          <div class="fixed inset-0 z-10" (click)="closeMenu()"></div>
+
+          <div class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-bg rounded-lg shadow-lg z-20 py-4">
+            <button
+              (click)="openEditBoard()"
+              class="w-full text-left px-4 py-2 body-l text-medium-gray hover:text-black dark:hover:text-white cursor-pointer"
+            >
+              Edit Board
+            </button>
+            <button
+              (click)="openDeleteBoard()"
+              class="w-full text-left px-4 py-2 body-l text-destructive cursor-pointer"
+            >
+              Delete Board
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</header>
+
+<!-- Mobile board selector dropdown (fullscreen overlay below header) -->
+@if (mobileSelectorOpen()) {
+  <!-- Backdrop -->
+  <div
+    class="fixed inset-0 z-30 bg-black/50 md:hidden"
+    (click)="closeMobileSelector()"
+  ></div>
+
+  <!-- Dropdown panel — 264px wide, left-aligned with the board name trigger -->
+  <div
+    class="fixed w-66 bg-white dark:bg-dark-surface rounded-lg shadow-lg z-40 py-4 md:hidden"
+    [style.top.px]="dropdownPos()?.top ?? 72"
+    [style.left.px]="dropdownPos()?.left ?? 56"
+  >
+    <p class="heading-s text-medium-gray px-6 mb-5">
+      ALL BOARDS ({{ boardService.boardCount() }})
+    </p>
+
+    @for (board of boardService.boards(); track board.id) {
+      <a
+        [routerLink]="['/boards', board.id]"
+        routerLinkActive="mobile-active-board"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeMobileSelector()"
+        class="mobile-board-nav flex items-center gap-4 pl-6 pr-4 py-3.5 rounded-r-full cursor-pointer
+               text-medium-gray hover:bg-primary/10 dark:hover:bg-white/10 hover:text-primary
+               transition-colors duration-150"
+      >
+        <img src="assets/icons/icon-board-grey.svg" alt="" class="board-icon-grey w-4 h-4 shrink-0">
+        <img src="assets/icons/icon-board-purple.svg" alt="" class="board-icon-purple w-4 h-4 shrink-0 hidden">
+        <span class="heading-m truncate">{{ board.name }}</span>
+      </a>
+    }
+
+    <!-- Create new board -->
+    <button
+      (click)="closeMobileSelector(); modalService.open('add-board')"
+      class="flex items-center gap-4 pl-6 pr-4 py-3.5 rounded-r-full w-full
+             text-primary hover:text-primary-light transition-colors duration-150 cursor-pointer"
+    >
+      <img src="assets/icons/icon-board-purple.svg" alt="" class="w-4 h-4 shrink-0">
+      <span class="heading-m">+ Create New Board</span>
+    </button>
+
+    <!-- Theme toggle -->
+    <div class="flex items-center justify-center gap-6 bg-light-bg dark:bg-dark-bg rounded-lg py-3.5 mx-4 mt-4">
+      <img src="assets/icons/icon-sun.svg" alt="Light mode" class="w-4.75 h-4.75">
+      <button
+        (click)="themeService.toggle()"
+        role="switch"
+        [attr.aria-checked]="themeService.isDark()"
+        aria-label="Toggle dark mode"
+        class="relative w-10 h-5 rounded-full bg-primary hover:bg-primary-light transition-colors duration-150 cursor-pointer"
+      >
+        <span
+          class="absolute left-0 top-0.75 w-3.5 h-3.5 bg-white rounded-full transition-all duration-150"
+          [style.left]="themeService.isDark() ? 'calc(100% - 17px)' : '3px'"
+        ></span>
+      </button>
+      <img src="assets/icons/icon-moon.svg" alt="Dark mode" class="w-4 h-4">
+    </div>
+  </div>
+}

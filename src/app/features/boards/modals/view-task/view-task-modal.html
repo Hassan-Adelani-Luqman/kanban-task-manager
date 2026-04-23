@@ -1,0 +1,86 @@
+@if (liveTask(); as task) {
+  <app-modal-overlay>
+    <div class="p-6 md:p-8">
+
+      <!-- Title + three-dot menu -->
+      <div class="flex items-start justify-between gap-4 mb-6">
+        <h2 class="heading-l text-black dark:text-white">{{ task.title }}</h2>
+
+        <div class="relative shrink-0 mt-1">
+          <button
+            (click)="menuOpen.update(v => !v)"
+            aria-label="Task options"
+            class="p-1 cursor-pointer"
+          >
+            <img src="assets/icons/icon-vertical-ellipsis.svg" alt="" class="h-5">
+          </button>
+
+          @if (menuOpen()) {
+            <div class="fixed inset-0 z-10" (click)="menuOpen.set(false)"></div>
+            <div class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-dark-bg rounded-lg shadow-lg z-20 py-4">
+              <button
+                (click)="openEdit()"
+                class="w-full text-left px-4 py-2 body-l text-medium-gray hover:text-black dark:hover:text-white cursor-pointer"
+              >
+                Edit Task
+              </button>
+              <button
+                (click)="openDelete()"
+                class="w-full text-left px-4 py-2 body-l text-destructive cursor-pointer"
+              >
+                Delete Task
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Description -->
+      @if (task.description) {
+        <p class="body-l text-medium-gray mb-6">{{ task.description }}</p>
+      }
+
+      <!-- Subtasks -->
+      @if (task.subtasks.length > 0) {
+        <div class="mb-6">
+          <p class="heading-s text-medium-gray dark:text-white mb-4">
+            Subtasks ({{ completedCount }} of {{ task.subtasks.length }})
+          </p>
+          <div class="flex flex-col gap-2">
+            @for (sub of task.subtasks; track sub.id) {
+              <label
+                class="flex items-center gap-4 bg-light-bg dark:bg-dark-bg rounded px-3 py-[13px] cursor-pointer
+                       hover:bg-primary/25 dark:hover:bg-primary/25 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="sub.isCompleted"
+                  (change)="toggleSubtask(sub.id)"
+                  class="w-4 h-4 accent-primary rounded-sm cursor-pointer"
+                >
+                <span
+                  class="body-m transition-colors"
+                  [class.line-through]="sub.isCompleted"
+                  [class.text-medium-gray]="sub.isCompleted"
+                  [class.text-black]="!sub.isCompleted"
+                  [class.dark:text-white]="!sub.isCompleted"
+                >
+                  {{ sub.title }}
+                </span>
+              </label>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Status dropdown -->
+      <app-dropdown
+        label="Current Status"
+        [options]="columnNames()"
+        [selected]="currentStatus()"
+        (selectedChange)="changeStatus($event)"
+      />
+
+    </div>
+  </app-modal-overlay>
+}

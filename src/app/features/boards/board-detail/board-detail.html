@@ -1,0 +1,30 @@
+@if (boardService.activeBoard(); as board) {
+  <div class="board-scroll flex gap-6 p-6 h-full items-start">
+
+    <!-- Columns -->
+    @for (col of filteredColumns; track col.id) {
+      <app-column [col]="col" />
+    }
+
+    <!-- Add New Column -->
+    <div
+      class="add-column-btn flex items-center justify-center w-[280px] shrink-0 rounded-lg mt-[39px] cursor-pointer
+             bg-gradient-to-b from-[#E9EFFA] to-[rgba(233,239,250,0.5)]
+             dark:from-[rgba(43,44,55,0.25)] dark:to-[rgba(43,44,55,0.125)]
+             hover:text-primary transition-colors"
+      style="min-height: 812px;"
+      (click)="openAddBoard()"
+      role="button"
+      aria-label="Add new column"
+    >
+      <span class="heading-xl text-medium-gray hover:text-primary transition-colors">
+        + New Column
+      </span>
+    </div>
+
+  </div>
+} @else {
+  <div class="flex items-center justify-center h-full">
+    <p class="heading-l text-medium-gray">Board not found.</p>
+  </div>
+}

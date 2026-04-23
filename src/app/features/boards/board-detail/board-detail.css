@@ -1,0 +1,9 @@
+.board-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  min-height: 100%;
+}
+
+.add-column-btn {
+  min-height: 812px;
+}

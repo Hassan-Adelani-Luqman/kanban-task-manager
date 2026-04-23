@@ -1,0 +1,17 @@
+.sidebar-container {
+  border-right: 1px solid;
+  border-color: var(--color-lines-light);
+}
+
+.dark .sidebar-container {
+  border-right: none;
+}
+
+/* Active board item */
+.active-board {
+  background-color: var(--color-primary) !important;
+  color: #fff !important;
+}
+
+.active-board .board-icon-grey  { display: none !important; }
+.active-board .board-icon-purple { display: block !important; filter: brightness(0) invert(1); }

@@ -1,3 +1,62 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+@source '../';
+
+/* Class-based dark mode — .dark on <html> activates dark: utilities */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+
+  /* Brand */
+  --color-primary:           #635FC7;
+  --color-primary-light:     #A8A4FF;
+  --color-destructive:       #EA5555;
+  --color-destructive-light: #FF9898;
+  --color-medium-gray:       #828FA3;
+  --color-lines-light:       #E4EBFA;
+
+  /* Surfaces */
+  --color-light-bg:      #F4F7FD;
+  --color-dark-bg:       #20212C;
+  --color-dark-surface:  #2B2C37;
+  --color-dark-lines:    #3E3F4E;
+  --color-black:         #000112;
+
+  /* Column dot colors */
+  --color-col-cyan:    #49C4E5;
+  --color-col-purple:  #8471F2;
+  --color-col-green:   #67E2AE;
+  --color-col-yellow:  #F4B400;
+  --color-col-red:     #EA5555;
+}
+
+/* ─── Base ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* ─── Typography utilities ──────────────────────── */
+.heading-xl { font-size: 24px; font-weight: 700; line-height: 30px; }
+.heading-l  { font-size: 18px; font-weight: 700; line-height: 23px; }
+.heading-m  { font-size: 15px; font-weight: 700; line-height: 19px; }
+.heading-s  {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 15px;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+}
+.body-l { font-size: 13px; font-weight: 500; line-height: 23px; }
+.body-m { font-size: 12px; font-weight: 700; line-height: 15px; }
+
+/* ─── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar       { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: #828FA3;
+  border-radius: 4px;
+}

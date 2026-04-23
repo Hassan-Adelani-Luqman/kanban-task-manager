@@ -1,0 +1,41 @@
+@if (payload(); as p) {
+  <app-modal-overlay>
+    <div class="p-6 md:p-8">
+
+      <h2 class="heading-l text-destructive mb-6">
+        Delete this {{ p.type === 'board' ? 'board' : 'task' }}?
+      </h2>
+
+      <p class="body-l text-medium-gray mb-6">
+        @if (p.type === 'board') {
+          Are you sure you want to delete the <strong class="font-bold">'{{ p.name }}'</strong> board?
+          This action will remove all columns and tasks and cannot be reversed.
+        } @else {
+          Are you sure you want to delete the <strong class="font-bold">'{{ p.name }}'</strong> task and its subtasks?
+          This action cannot be reversed.
+        }
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button
+          type="button"
+          (click)="confirm()"
+          class="flex-1 py-[14px] rounded-full bg-destructive hover:bg-destructive-light
+                 text-white heading-m transition-colors cursor-pointer"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          (click)="cancel()"
+          class="flex-1 py-[14px] rounded-full bg-primary/10 dark:bg-white
+                 text-primary heading-m hover:bg-primary/25 dark:hover:bg-white/80
+                 transition-colors cursor-pointer"
+        >
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </app-modal-overlay>
+}

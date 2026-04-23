@@ -1,0 +1,65 @@
+<!-- Navigation progress bar -->
+@if (isNavigating()) {
+  <div class="fixed top-0 left-0 right-0 h-[3px] bg-primary z-50 animate-pulse"></div>
+}
+
+<div class="app-shell flex h-screen overflow-hidden bg-light-bg dark:bg-dark-bg">
+
+  <!-- Sidebar (desktop) -->
+  <aside
+    class="sidebar-slot hidden md:flex flex-col shrink-0 transition-all duration-300 overflow-hidden"
+    [class.w-[260px]]="sidebarVisible()"
+    [class.w-0]="!sidebarVisible()"
+  >
+    @if (sidebarVisible()) {
+      <app-sidebar (hide)="toggleSidebar()" class="flex flex-col h-full w-[260px]" />
+    }
+  </aside>
+
+  <!-- Main area -->
+  <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+    <app-header />
+
+    <main class="flex-1 overflow-auto">
+      <router-outlet />
+    </main>
+  </div>
+
+  <!-- Show sidebar button (desktop only, when sidebar hidden) -->
+  @if (!sidebarVisible()) {
+    <button
+      (click)="toggleSidebar()"
+      class="hidden md:flex fixed bottom-8 left-0 items-center gap-[10px]
+             bg-primary hover:bg-primary-light text-white heading-m
+             pl-[18px] pr-6 py-[19px] rounded-r-full transition-colors duration-150 z-30 cursor-pointer"
+      aria-label="Show sidebar"
+    >
+      <img src="assets/icons/icon-show-sidebar.svg" alt="" class="w-4 h-4">
+    </button>
+  }
+</div>
+
+<!-- ── Modal host ─────────────────────────────────────────────────── -->
+@switch (modalService.activeModal()) {
+  @case ('view-task') {
+    <app-view-task-modal />
+  }
+  @case ('add-task') {
+    <app-add-edit-task-modal [mode]="'add'" />
+  }
+  @case ('edit-task') {
+    <app-add-edit-task-modal [mode]="'edit'" />
+  }
+  @case ('add-board') {
+    <app-add-edit-board-modal [mode]="'add'" />
+  }
+  @case ('edit-board') {
+    <app-add-edit-board-modal [mode]="'edit'" />
+  }
+  @case ('delete-board') {
+    <app-delete-confirm-modal />
+  }
+  @case ('delete-task') {
+    <app-delete-confirm-modal />
+  }
+}
