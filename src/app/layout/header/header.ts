@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { BoardService } from '../../core/services/board.service';
 import { ModalService } from '../../core/services/modal.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -14,6 +14,7 @@ export class Header {
   protected readonly boardService = inject(BoardService);
   protected readonly modalService = inject(ModalService);
   protected readonly themeService = inject(ThemeService);
+  private readonly router = inject(Router);
 
   readonly menuOpen = signal(false);
   readonly mobileSelectorOpen = signal(false);
@@ -66,7 +67,8 @@ export class Header {
   }
 
   openAddTask(): void {
-    this.modalService.open('add-task');
+    const boardId = this.boardService.activeBoardId();
+    if (boardId) this.router.navigate(['/boards', boardId, 'new-task']);
   }
 
   get hasColumns(): boolean {

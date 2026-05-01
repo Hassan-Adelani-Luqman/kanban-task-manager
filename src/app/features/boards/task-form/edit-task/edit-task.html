@@ -1,0 +1,135 @@
+<div class="min-h-screen bg-light-bg dark:bg-dark-bg p-4 md:p-8">
+  <div class="max-w-[480px] mx-auto bg-white dark:bg-dark-surface rounded-lg shadow p-6 md:p-8">
+
+    <h1 class="heading-l text-black dark:text-white mb-6">Edit Task</h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- Title -->
+      <div class="flex flex-col gap-2 mb-6">
+        <label for="title" class="heading-s text-medium-gray dark:text-white">
+          Title <span class="text-destructive">*</span>
+        </label>
+        <div class="relative">
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="e.g. Take coffee break"
+            (input)="duplicateTitleError = false"
+            class="w-full border rounded px-4 py-2 body-l bg-white dark:bg-dark-surface
+                   text-black dark:text-white placeholder:text-medium-gray/40
+                   outline-none focus:border-primary transition-colors"
+            [class.border-destructive]="(f['title'].invalid && f['title'].touched) || duplicateTitleError"
+            [class.border-lines-light]="!(f['title'].invalid && f['title'].touched) && !duplicateTitleError"
+            [class.dark:border-dark-lines]="!(f['title'].invalid && f['title'].touched) && !duplicateTitleError"
+          />
+          @if (f['title'].touched && f['title'].hasError('required')) {
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 body-l text-destructive whitespace-nowrap">
+              Can't be empty
+            </span>
+          }
+          @if (f['title'].touched && f['title'].hasError('minlength')) {
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 body-l text-destructive whitespace-nowrap">
+              Min 3 characters
+            </span>
+          }
+          @if (f['title'].touched && f['title'].hasError('maxlength')) {
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 body-l text-destructive whitespace-nowrap">
+              Max 100 characters
+            </span>
+          }
+          @if (f['title'].touched && f['title'].hasError('whitespace')) {
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 body-l text-destructive whitespace-nowrap">
+              No leading/trailing spaces
+            </span>
+          }
+          @if (duplicateTitleError) {
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 body-l text-destructive whitespace-nowrap">
+              Title already exists
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="flex flex-col gap-2 mb-6">
+        <label for="description" class="heading-s text-medium-gray dark:text-white">
+          Description
+        </label>
+        <textarea
+          id="description"
+          formControlName="description"
+          rows="4"
+          placeholder="e.g. It's always good to take a break."
+          class="w-full border border-lines-light dark:border-dark-lines rounded px-4 py-2 body-l
+                 bg-white dark:bg-dark-surface text-black dark:text-white
+                 placeholder:text-medium-gray/40 outline-none focus:border-primary
+                 transition-colors resize-none"
+        ></textarea>
+      </div>
+
+      <!-- Status -->
+      <div class="flex flex-col gap-2 mb-6">
+        <label for="status" class="heading-s text-medium-gray dark:text-white">
+          Status <span class="text-destructive">*</span>
+        </label>
+        <div class="relative">
+          <select
+            id="status"
+            formControlName="status"
+            class="w-full appearance-none border border-lines-light dark:border-dark-lines rounded px-4 py-2
+                   body-l bg-white dark:bg-dark-surface text-black dark:text-white
+                   outline-none focus:border-primary transition-colors cursor-pointer"
+          >
+            @for (col of columns; track col) {
+              <option [value]="col">{{ col }}</option>
+            }
+          </select>
+          <!-- Chevron icon -->
+          <svg class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 shrink-0"
+               width="10" height="7" viewBox="0 0 10 7" fill="none">
+            <path d="M1 1l4 4 4-4" stroke="#635FC7" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Due Date -->
+      <div class="flex flex-col gap-2 mb-8">
+        <label for="dueDate" class="heading-s text-medium-gray dark:text-white">
+          Due Date <span class="body-l text-medium-gray normal-case font-normal">(optional)</span>
+        </label>
+        <input
+          id="dueDate"
+          type="date"
+          formControlName="dueDate"
+          class="w-full border border-lines-light dark:border-dark-lines rounded px-4 py-2 body-l
+                 bg-white dark:bg-dark-surface text-black dark:text-white
+                 outline-none focus:border-primary transition-colors"
+        />
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex flex-col gap-4">
+        <button
+          type="submit"
+          [disabled]="form.invalid"
+          class="w-full py-[14px] rounded-full bg-primary hover:bg-primary-light text-white
+                 heading-m transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+        >
+          Save Changes
+        </button>
+        <button
+          type="button"
+          (click)="cancel()"
+          class="w-full py-[14px] rounded-full bg-light-bg dark:bg-white/10 hover:bg-lines-light
+                 text-medium-gray heading-m transition-colors cursor-pointer"
+        >
+          Cancel
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

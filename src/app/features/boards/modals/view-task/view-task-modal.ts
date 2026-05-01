@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { BoardService } from '../../../../core/services/board.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ModalOverlay } from '../../../../shared/components/modal-overlay/modal-overlay';
@@ -13,6 +14,7 @@ import { Task } from '../../../../core/models/board.models';
 export class ViewTaskModal {
   protected readonly modalService = inject(ModalService);
   protected readonly boardService = inject(BoardService);
+  private readonly router = inject(Router);
 
   readonly menuOpen = signal(false);
 
@@ -64,7 +66,8 @@ export class ViewTaskModal {
     const bid = this.boardId();
     if (!t || !bid) return;
     this.menuOpen.set(false);
-    this.modalService.open('edit-task', { task: t, boardId: bid });
+    this.modalService.close();
+    this.router.navigate(['/boards', bid, 'edit', t.id]);
   }
 
   openDelete(): void {

@@ -15,4 +15,18 @@ export const boardsRoutes: Routes = [
     canDeactivate: [unsavedChangesGuard],
     title: 'Board — Kanban',
   },
+  {
+    path: 'boards/:boardId/new-task',
+    loadComponent: () =>
+      import('./task-form/add-task/add-task').then(m => m.AddTask),
+    canDeactivate: [unsavedChangesGuard],
+    title: 'Add Task — Kanban',
+  },
+  {
+    path: 'boards/:boardId/edit/:taskId',
+    loadComponent: () =>
+      import('./task-form/edit-task/edit-task').then(m => m.EditTask),
+    canDeactivate: [unsavedChangesGuard],
+    title: 'Edit Task — Kanban',
+  },
 ];
