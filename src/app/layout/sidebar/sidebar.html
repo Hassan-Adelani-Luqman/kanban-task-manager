@@ -8,11 +8,29 @@
 
   <!-- Board list -->
   <nav class="flex-1 overflow-y-auto pr-6">
-    <p class="heading-s text-medium-gray pl-6 mb-5">
+    <p class="heading-s text-medium-gray pl-6 mb-4">
       ALL BOARDS ({{ boardService.boardCount() }})
     </p>
 
-    @for (board of boardService.boards(); track board.id) {
+    <!-- Search input — powered by FilterService (BehaviorSubject demo) -->
+    <div class="pl-4 pr-2 mb-3">
+      <input
+        type="text"
+        [value]="filterService.getCurrentSearch()"
+        (input)="filterService.setBoardSearch($any($event.target).value)"
+        placeholder="Search boards…"
+        class="w-full border border-lines-light dark:border-dark-lines rounded px-3 py-1.5
+               body-l bg-white dark:bg-dark-surface text-black dark:text-white
+               placeholder:text-medium-gray/50 outline-none focus:border-primary transition-colors"
+      />
+    </div>
+
+    <!--
+      filteredBoards$ is an Observable — the async pipe subscribes automatically
+      and unsubscribes when the sidebar is destroyed (no memory leaks).
+      It emits whenever either the search term or the boards list changes.
+    -->
+    @for (board of filteredBoards$ | async; track board.id) {
       <a
         [routerLink]="['/boards', board.id]"
         routerLinkActive="active-board"
