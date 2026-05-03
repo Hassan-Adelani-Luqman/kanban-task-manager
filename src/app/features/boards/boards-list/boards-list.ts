@@ -6,21 +6,27 @@ import { ModalService } from '../../../core/services/modal.service';
 @Component({
   selector: 'app-boards-list',
   template: `
-    <div class="flex flex-col items-center justify-center h-full text-center p-8">
-      <p class="heading-l text-medium-gray mb-8">
-        This board is empty. Create a new column to get started.
-      </p>
-      <button
-        (click)="openAddBoard()"
-        class="bg-primary hover:bg-primary-light text-white heading-m rounded-full px-6 py-4 transition-colors cursor-pointer"
-      >
-        + Create New Board
-      </button>
-    </div>
+    @if (boardService.loading()) {
+      <div class="flex items-center justify-center h-full">
+        <p class="body-l text-medium-gray">Loading boards…</p>
+      </div>
+    } @else if (boardService.boards().length === 0) {
+      <div class="flex flex-col items-center justify-center h-full text-center p-8">
+        <p class="heading-l text-medium-gray mb-8">
+          This board is empty. Create a new column to get started.
+        </p>
+        <button
+          (click)="openAddBoard()"
+          class="bg-primary hover:bg-primary-light text-white heading-m rounded-full px-6 py-4 transition-colors cursor-pointer"
+        >
+          + Create New Board
+        </button>
+      </div>
+    }
   `,
 })
 export class BoardsList implements OnInit {
-  private readonly boardService = inject(BoardService);
+  protected readonly boardService = inject(BoardService);
   private readonly router = inject(Router);
   private readonly modalService = inject(ModalService);
 

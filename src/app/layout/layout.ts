@@ -10,6 +10,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { Sidebar } from './sidebar/sidebar';
 import { Header } from './header/header';
+import { BoardService } from '../core/services/board.service';
 import { ModalService } from '../core/services/modal.service';
 import { ThemeService } from '../core/services/theme.service';
 import { HasUnsavedChanges } from '../core/guards/unsaved-changes.guard';
@@ -36,6 +37,7 @@ import { DeleteConfirmModal } from '../features/boards/modals/delete-confirm/del
 })
 export class Layout implements HasUnsavedChanges {
   protected readonly modalService = inject(ModalService);
+  protected readonly boardService = inject(BoardService);
   private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);

@@ -1,12 +1,12 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
-import { Board, Column, Task, Subtask, generateId, COLUMN_COLORS } from '../models/board.models';
-import { SEED_DATA } from '../data/seed-data';
-
-const STORAGE_KEY = 'kanban-boards';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Board, Column, Task, generateId, COLUMN_COLORS } from '../models/board.models';
+import { BoardApiService } from './board-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class BoardService {
-  private readonly _boards = signal<Board[]>(this.loadFromStorage());
+  private readonly api = inject(BoardApiService);
+
+  private readonly _boards = signal<Board[]>([]);
   private readonly _activeBoardId = signal<string | null>(null);
 
   readonly boards = this._boards.asReadonly();
@@ -18,9 +18,28 @@ export class BoardService {
 
   readonly boardCount = computed(() => this._boards().length);
 
+  // New signals for HTTP feedback — components can read these to show loading/error UI
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
+
   constructor() {
-    effect(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this._boards()));
+    this.loadBoards();
+  }
+
+  // ─── Private helpers ───────────────────────────────────────────────────────
+
+  private loadBoards(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.api.getBoards().subscribe({
+      next: (boards) => {
+        this._boards.set(boards);
+        this.loading.set(false);
+      },
+      error: (err: Error) => {
+        this.error.set(err.message);
+        this.loading.set(false);
+      },
     });
   }
 
@@ -34,130 +53,159 @@ export class BoardService {
     return this._boards().find(b => b.id === id);
   }
 
-  // ─── Board CRUD ────────────────────────────────────────────────────────────
+  // ─── Board CRUD — optimistic update pattern ────────────────────────────────
+  // Each mutating method:
+  //   1. Saves a snapshot of the current state
+  //   2. Updates the signal immediately so the UI reflects the change at once
+  //   3. Calls the API in the background
+  //   4. On API error: reverts the signal to the snapshot and shows the error
 
   createBoard(name: string, columns: { name: string; color: string }[]): Board {
     const newBoard: Board = {
       id: generateId(),
       name,
-      columns: columns.map(c => ({
-        id: generateId(),
-        name: c.name,
-        color: c.color,
-        tasks: [],
-      })),
+      columns: columns.map(c => ({ id: generateId(), name: c.name, color: c.color, tasks: [] })),
     };
+    const snapshot = this._boards();
     this._boards.update(boards => [...boards, newBoard]);
+
+    this.api.createBoard(newBoard).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
     return newBoard;
   }
 
   updateBoard(boardId: string, name: string, columns: { id?: string; name: string; color: string }[]): void {
-    this._boards.update(boards =>
-      boards.map(b => {
-        if (b.id !== boardId) return b;
+    const snapshot = this._boards();
+    const updated = this._boards().map(b => {
+      if (b.id !== boardId) return b;
 
-        const updatedColumns: Column[] = columns.map(c => {
-          const existing = b.columns.find(ec => ec.id === c.id);
-          if (existing) {
-            return { ...existing, name: c.name, color: c.color };
-          }
-          return { id: generateId(), name: c.name, color: c.color, tasks: [] };
-        });
+      const updatedColumns: Column[] = columns.map(c => {
+        const existing = b.columns.find(ec => ec.id === c.id);
+        if (existing) return { ...existing, name: c.name, color: c.color };
+        return { id: generateId(), name: c.name, color: c.color, tasks: [] };
+      });
 
-        // Reassign tasks whose status column name changed
-        const allTasks = b.columns.flatMap(col => col.tasks);
-        const oldColMap = new Map(b.columns.map(col => [col.id, col.name]));
+      // Reassign tasks whose column was renamed (preserve the task/column association by id)
+      const allTasks = b.columns.flatMap(col => col.tasks);
+      allTasks.forEach(task => {
+        const oldCol = b.columns.find(col => col.tasks.some(t => t.id === task.id));
+        if (!oldCol) return;
+        const newCol = updatedColumns.find(nc => nc.id === oldCol.id);
+        if (newCol && !newCol.tasks.some(t => t.id === task.id)) {
+          newCol.tasks.push({ ...task, status: newCol.name });
+        }
+      });
 
-        allTasks.forEach(task => {
-          const oldColEntry = b.columns.find(col => col.tasks.some(t => t.id === task.id));
-          if (!oldColEntry) return;
-          const newColForOld = updatedColumns.find(nc => nc.id === oldColEntry.id);
-          if (newColForOld) {
-            const targetCol = updatedColumns.find(nc => nc.id === oldColEntry.id);
-            if (targetCol && !targetCol.tasks.some(t => t.id === task.id)) {
-              targetCol.tasks.push({ ...task, status: newColForOld.name });
-            }
-          }
-        });
+      return { ...b, name, columns: updatedColumns };
+    });
+    this._boards.set(updated);
 
-        return { ...b, name, columns: updatedColumns };
-      })
-    );
+    const board = updated.find(b => b.id === boardId)!;
+    this.api.updateBoard(board).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
   }
 
   deleteBoard(boardId: string): void {
+    const snapshot = this._boards();
     this._boards.update(boards => boards.filter(b => b.id !== boardId));
     if (this._activeBoardId() === boardId) {
       const remaining = this._boards();
       this._activeBoardId.set(remaining.length > 0 ? remaining[0].id : null);
     }
+
+    this.api.deleteBoard(boardId).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
   }
 
   addColumn(boardId: string, name: string): void {
+    const snapshot = this._boards();
     this._boards.update(boards =>
       boards.map(b => {
         if (b.id !== boardId) return b;
-        const colorIndex = b.columns.length % COLUMN_COLORS.length;
-        const newCol: Column = {
-          id: generateId(),
-          name,
-          color: COLUMN_COLORS[colorIndex],
-          tasks: [],
-        };
-        return { ...b, columns: [...b.columns, newCol] };
+        const color = COLUMN_COLORS[b.columns.length % COLUMN_COLORS.length];
+        return { ...b, columns: [...b.columns, { id: generateId(), name, color, tasks: [] }] };
       })
     );
+
+    const board = this._boards().find(b => b.id === boardId)!;
+    this.api.updateBoard(board).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
   }
 
   // ─── Task CRUD ─────────────────────────────────────────────────────────────
 
   createTask(boardId: string, task: Omit<Task, 'id'>): Task {
     const newTask: Task = { id: generateId(), ...task };
+    const snapshot = this._boards();
     this._boards.update(boards =>
       boards.map(b => {
         if (b.id !== boardId) return b;
         return {
           ...b,
-          columns: b.columns.map(col => {
-            if (col.name !== task.status) return col;
-            return { ...col, tasks: [...col.tasks, newTask] };
-          }),
+          columns: b.columns.map(col =>
+            col.name === task.status ? { ...col, tasks: [...col.tasks, newTask] } : col
+          ),
         };
       })
     );
+
+    const board = this._boards().find(b => b.id === boardId)!;
+    this.api.updateBoard(board).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
     return newTask;
   }
 
   updateTask(boardId: string, updatedTask: Task, previousStatus: string): void {
+    const snapshot = this._boards();
     this._boards.update(boards =>
       boards.map(b => {
         if (b.id !== boardId) return b;
         return {
           ...b,
           columns: b.columns.map(col => {
-            // Remove from old column
-            if (col.name === previousStatus && col.name !== updatedTask.status) {
+            if (col.name === previousStatus && col.name !== updatedTask.status)
               return { ...col, tasks: col.tasks.filter(t => t.id !== updatedTask.id) };
-            }
-            // Add to new column
-            if (col.name === updatedTask.status && col.name !== previousStatus) {
+            if (col.name === updatedTask.status && col.name !== previousStatus)
               return { ...col, tasks: [...col.tasks, updatedTask] };
-            }
-            // Update in same column
-            if (col.name === updatedTask.status && col.name === previousStatus) {
-              return {
-                ...col,
-                tasks: col.tasks.map(t => (t.id === updatedTask.id ? updatedTask : t)),
-              };
-            }
+            if (col.name === updatedTask.status)
+              return { ...col, tasks: col.tasks.map(t => t.id === updatedTask.id ? updatedTask : t) };
             return col;
           }),
         };
       })
     );
+
+    const board = this._boards().find(b => b.id === boardId)!;
+    this.api.updateBoard(board).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
   }
 
   deleteTask(boardId: string, taskId: string): void {
+    const snapshot = this._boards();
     this._boards.update(boards =>
       boards.map(b => {
         if (b.id !== boardId) return b;
@@ -170,9 +218,18 @@ export class BoardService {
         };
       })
     );
+
+    const board = this._boards().find(b => b.id === boardId)!;
+    this.api.updateBoard(board).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
   }
 
   toggleSubtask(boardId: string, taskId: string, subtaskId: string): void {
+    const snapshot = this._boards();
     this._boards.update(boards =>
       boards.map(b => {
         if (b.id !== boardId) return b;
@@ -180,27 +237,34 @@ export class BoardService {
           ...b,
           columns: b.columns.map(col => ({
             ...col,
-            tasks: col.tasks.map(t => {
-              if (t.id !== taskId) return t;
-              return {
+            tasks: col.tasks.map(t =>
+              t.id !== taskId ? t : {
                 ...t,
                 subtasks: t.subtasks.map(s =>
                   s.id === subtaskId ? { ...s, isCompleted: !s.isCompleted } : s
                 ),
-              };
-            }),
+              }
+            ),
           })),
         };
       })
     );
+
+    const board = this._boards().find(b => b.id === boardId)!;
+    this.api.updateBoard(board).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
   }
 
   moveTask(boardId: string, taskId: string, newStatus: string): void {
+    const snapshot = this._boards();
     this._boards.update(boards =>
       boards.map(b => {
         if (b.id !== boardId) return b;
         let taskToMove: Task | undefined;
-        // Remove task from its current column and capture it
         const columnsWithRemoved = b.columns.map(col => {
           const task = col.tasks.find(t => t.id === taskId);
           if (task) {
@@ -210,34 +274,25 @@ export class BoardService {
           return col;
         });
         if (!taskToMove) return b;
-        // Add task to new column
         return {
           ...b,
-          columns: columnsWithRemoved.map(col => {
-            if (col.name !== newStatus) return col;
-            return { ...col, tasks: [...col.tasks, taskToMove!] };
-          }),
+          columns: columnsWithRemoved.map(col =>
+            col.name === newStatus ? { ...col, tasks: [...col.tasks, taskToMove!] } : col
+          ),
         };
       })
     );
+
+    const board = this._boards().find(b => b.id === boardId)!;
+    this.api.updateBoard(board).subscribe({
+      error: (err: Error) => {
+        this._boards.set(snapshot);
+        this.error.set(err.message);
+      },
+    });
   }
 
   resetToSeedData(): void {
-    this._boards.set(JSON.parse(JSON.stringify(SEED_DATA)));
-  }
-
-  // ─── Private helpers ───────────────────────────────────────────────────────
-
-  private loadFromStorage(): Board[] {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {
-      // ignore corrupted storage
-    }
-    return JSON.parse(JSON.stringify(SEED_DATA));
+    this.loadBoards();
   }
 }
