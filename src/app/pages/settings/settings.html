@@ -13,9 +13,8 @@
         class="relative w-10 h-5 rounded-full bg-primary hover:bg-primary-light transition-colors cursor-pointer"
       >
         <span
-          class="absolute top-[3px] w-[14px] h-[14px] bg-white rounded-full transition-transform"
-          [class.translate-x-[22px]]="themeService.isDark()"
-          [class.translate-x-[3px]]="!themeService.isDark()"
+          class="absolute top-0.75 w-3.5 h-3.5 bg-white rounded-full transition-all duration-150"
+          [style.left]="themeService.isDark() ? 'calc(100% - 17px)' : '3px'"
         ></span>
       </button>
     </div>
