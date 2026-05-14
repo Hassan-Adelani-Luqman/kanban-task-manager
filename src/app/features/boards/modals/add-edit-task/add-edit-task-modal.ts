@@ -81,7 +81,13 @@ export class AddEditTaskModal implements OnInit {
       this.titleError.set("Can't be empty");
       valid = false;
     } else {
-      this.titleError.set('');
+      const allTasks = this.boardService.activeBoard()?.columns.flatMap(c => c.tasks) ?? [];
+      const duplicate = allTasks.some(
+        t => t.title.toLowerCase() === this.title().trim().toLowerCase() &&
+             t.id !== this.existingTask()?.id
+      );
+      this.titleError.set(duplicate ? 'Must be unique' : '');
+      if (duplicate) valid = false;
     }
 
     this.subtasks.update(list =>
