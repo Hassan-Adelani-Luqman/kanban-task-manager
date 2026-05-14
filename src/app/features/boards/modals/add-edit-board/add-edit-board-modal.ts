@@ -79,12 +79,19 @@ export class AddEditBoardModal implements OnInit {
       this.boardNameError.set('');
     }
 
+    const seenNames = new Set<string>();
     this.columns.update(list =>
       list.map(c => {
         if (!c.name.trim()) {
           valid = false;
           return { ...c, error: "Can't be empty" };
         }
+        const lower = c.name.trim().toLowerCase();
+        if (seenNames.has(lower)) {
+          valid = false;
+          return { ...c, error: 'Must be unique' };
+        }
+        seenNames.add(lower);
         return { ...c, error: '' };
       })
     );
