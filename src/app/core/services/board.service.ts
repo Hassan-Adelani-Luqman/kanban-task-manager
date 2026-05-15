@@ -1,4 +1,4 @@
-import { computed, Injectable, inject } from '@angular/core';
+import { computed, Injectable, inject, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Board, Column, Task, generateId, COLUMN_COLORS } from '../models/board.models';
@@ -60,12 +60,12 @@ export class BoardService {
     { initialValue: [] as Board[] }
   );
 
-  readonly activeBoardId = toSignal(
+  readonly activeBoardId: Signal<string | null> = toSignal(
     this.store.select(selectActiveBoardId),
     { initialValue: null }
   );
 
-  readonly activeBoard = toSignal(
+  readonly activeBoard: Signal<Board | null> = toSignal(
     this.store.select(selectActiveBoard),
     { initialValue: null }
   );
