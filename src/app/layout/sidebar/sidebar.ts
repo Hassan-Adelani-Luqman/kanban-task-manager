@@ -25,9 +25,6 @@ export class Sidebar {
   /**
    * filteredBoards$ — combines the search term (BehaviorSubject) with the
    * boards list (NgRx store selector) to produce a filtered Observable.
-   *
-   * combineLatest emits whenever EITHER source emits, giving us always-fresh data.
-   * The template uses the async pipe to subscribe and auto-unsubscribe.
    */
   readonly filteredBoards$ = combineLatest([
     this.filterService.boardSearch,          // Observable<string> from BehaviorSubject

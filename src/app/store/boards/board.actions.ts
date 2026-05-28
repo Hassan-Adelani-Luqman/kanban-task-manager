@@ -5,12 +5,6 @@ import { Board, Task } from '../../core/models/board.models';
  * BoardActions — all events that can happen to board/task state.
  *
  * createActionGroup() groups related actions under one source name.
- * It auto-generates:
- *   - Action types:    '[Boards] Load Boards', '[Boards] Create Task', etc.
- *   - Action creators: BoardActions.loadBoards(), BoardActions.createTask({ ... }), etc.
- *
- * emptyProps() — action carries no extra data
- * props<T>()   — action carries a typed payload
  */
 export const BoardActions = createActionGroup({
   source: 'Boards',

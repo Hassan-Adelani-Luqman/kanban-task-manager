@@ -1,16 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { BoardsState, boardsAdapter } from './board.state';
 
-/**
- * Selectors — pure functions that extract data from the NgRx store.
- *
- * Benefits:
- *   - Components only access the slice of state they need (no over-fetching)
- *   - Memoized: if the input state hasn't changed, the selector returns the
- *     cached result without recomputing
- *   - Composable: build complex selectors from simpler ones
- */
-
 // Step 1: select the entire 'boards' feature slice
 export const selectBoardsState = createFeatureSelector<BoardsState>('boards');
 

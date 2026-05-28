@@ -6,15 +6,7 @@ import { SEED_DATA } from '../data/seed-data';
 const STORAGE_KEY = 'kanban-boards';
 
 /**
- * BoardDataService — wraps localStorage in Observables.
- *
- * This gives NgRx Effects the same interface they would use with HttpClient:
- *   getBoards()    →  like  httpClient.get<Board[]>('/api/boards')
- *   saveBoards()   →  like  httpClient.put<Board[]>('/api/boards', boards)
- *
- * To switch to a real API later, only this service needs to change.
- * All Effects stay identical.
- */
+ * BoardDataService — wraps localStorage in Observables.*/
 @Injectable({ providedIn: 'root' })
 export class BoardDataService {
   /** Load all boards — returns an Observable so Effects can use switchMap/catchError */

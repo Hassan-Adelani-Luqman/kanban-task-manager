@@ -6,19 +6,6 @@ import { BoardDataService } from '../../core/services/board-data.service';
 import { BoardActions } from './board.actions';
 import { selectAllBoards } from './board.selectors';
 
-/**
- * BoardEffects — handles side effects triggered by actions.
- *
- * Effects listen for specific actions, do async work (API calls, localStorage, etc.),
- * then dispatch new actions with the results.
- *
- * Data flow:
- *   Action dispatched → Effect intercepts → async work → new action dispatched
- *                                                       ↓
- *                                                  Reducer updates state
- *                                                       ↓
- *                                               Components re-render
- */
 @Injectable()
 export class BoardEffects {
   private readonly actions$ = inject(Actions);
@@ -27,11 +14,6 @@ export class BoardEffects {
 
   /**
    * loadBoards$ — triggered by BoardActions.loadBoards
-   *
-   * Reads boards from localStorage (via BoardDataService) and dispatches
-   * loadBoardsSuccess with the result, or loadBoardsFailure on error.
-   *
-   * switchMap cancels any previous in-flight load if a new one starts.
    */
   loadBoards$ = createEffect(() =>
     this.actions$.pipe(
@@ -48,14 +30,7 @@ export class BoardEffects {
   );
 
   /**
-   * saveBoards$ — triggered by any action that modifies board/task data
-   *
-   * After the reducer has already updated the store, this effect reads the
-   * current boards from the store (withLatestFrom) and saves them to localStorage.
-   *
-   * dispatch: false — this effect does NOT dispatch a follow-up action.
-   * tap() — used for side effects that don't change the stream value.
-   */
+   * saveBoards$ — triggered by any action that modifies board/task data */
   saveBoards$ = createEffect(
     () =>
       this.actions$.pipe(

@@ -2,17 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 /**
- * FilterService — Task 2: BehaviorSubject-based shared state
- *
- * BehaviorSubject is a special type of RxJS Subject that:
- *   1. Requires an initial value ('' here)
- *   2. Stores the current value — new subscribers immediately receive it
- *   3. All subscribers get every future value pushed via .next()
- *
- * Compare with:
- *   - Subject         → no initial value, no replay for late subscribers
- *   - ReplaySubject(1)→ no initial value, replays the last emission to new subscribers
- *   - BehaviorSubject → initial value required, always has "current value"
+ * FilterService — BehaviorSubject-based shared state
  */
 @Injectable({ providedIn: 'root' })
 export class FilterService {

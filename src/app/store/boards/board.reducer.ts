@@ -1,16 +1,9 @@
 import { createReducer, on } from '@ngrx/store';
-import { generateId, COLUMN_COLORS, SEED_DATA, Board, Column } from '../../core/models/board.models';
+import { generateId, COLUMN_COLORS, Board, Column } from '../../core/models/board.models';
+import { SEED_DATA } from '../../core/data/seed-data';
 import { BoardActions } from './board.actions';
 import { boardsAdapter, initialState } from './board.state';
 
-/**
- * boardsReducer — pure function: (currentState, action) → nextState
- *
- * Rules:
- *   - Never mutate state directly — always return a new object
- *   - No side effects (no API calls, no localStorage here — that's Effects' job)
- *   - Each `on()` handles one action type
- */
 export const boardsReducer = createReducer(
   initialState,
 
@@ -75,8 +68,6 @@ export const boardsReducer = createReducer(
 
   // ── Task CRUD ────────────────────────────────────────────────────────────
   // Tasks are nested inside Board.columns[].tasks, so we update the parent board
-  // using updateOne() after making immutable changes to the nested structure.
-
   on(BoardActions.createTask, (state, { boardId, task }) => {
     const board = state.entities[boardId];
     if (!board) return state;

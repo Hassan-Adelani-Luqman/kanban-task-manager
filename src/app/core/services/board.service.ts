@@ -11,7 +11,6 @@ import {
 
 /**
  * Pure helper — rebuilds a board's column list after an edit, preserving tasks
- * in renamed columns. Kept outside the class so it is easy to test independently.
  */
 function buildUpdatedBoard(
   existing: Board,
@@ -39,15 +38,7 @@ function buildUpdatedBoard(
 }
 
 /**
- * BoardService — NgRx Façade
- *
- * Public API is IDENTICAL to the original signal-based version,
- * so no component or template needs to change.
- *
- * Internally:
- *   - Reads state via store selectors, converted to Angular signals with toSignal()
- *   - Writes state by dispatching NgRx actions
- *   - Effects in board.effects.ts handle the localStorage side effects
+ * BoardService 
  */
 @Injectable({ providedIn: 'root' })
 export class BoardService {
