@@ -10,9 +10,6 @@ export class BoardApiService {
   private readonly base = `${environment.apiUrl}/boards`;
 
   // shareReplay(1) caches the last emission and replays it to new subscribers.
-  // Without it, every new subscriber would trigger a fresh HTTP GET request.
-  // With it, the first subscriber fetches from the server; all later subscribers
-  // receive the same cached response without hitting the network again.
   private readonly boards$ = this.http.get<Board[]>(this.base).pipe(shareReplay(1));
 
   getBoards(): Observable<Board[]> {

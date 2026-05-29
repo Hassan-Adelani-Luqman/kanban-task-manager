@@ -1,6 +1,3 @@
-// This interceptor runs for every outgoing HTTP request in the app.
-// The interceptor chain is declared in provideHttpClient(withInterceptors([...]))
-// — order matters, just like Express middleware.
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
 
@@ -28,3 +25,4 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
+
